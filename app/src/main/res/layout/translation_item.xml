@@ -19,9 +19,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:minHeight="50dp"
-            android:paddingLeft="15dp"
             android:text="Lang"
-            android:textSize="24sp" />
+            android:textAlignment="center"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/originalText"
@@ -30,7 +30,7 @@
             android:layout_weight="1"
             android:minHeight="50dp"
             android:text="OriginalText"
-            android:textSize="24sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/translatedText"
@@ -39,6 +39,6 @@
             android:layout_weight="1"
             android:minHeight="50dp"
             android:text="translated Text"
-            android:textSize="24sp" />
+            android:textSize="16sp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

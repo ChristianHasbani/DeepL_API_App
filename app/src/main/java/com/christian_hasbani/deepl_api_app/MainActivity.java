@@ -42,8 +42,7 @@ public class MainActivity extends AppCompatActivity {
     //Translation manager for saving preferences
     private TranslationManager translationManager;
 
-    //Character count
-    private TextView charCountText,charLimitText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,41 +53,44 @@ public class MainActivity extends AppCompatActivity {
         AndroidNetworking.initialize(this);
         getLanguages();
         translationManager = new TranslationManager(getApplicationContext());
-        setCharCount();
     }
 
     public void onClickTranslate(View view){
-        String textToTranslate = originalText.getText().toString();
-        String targetLangCode = getSelectedLangCode(targetLangSelected);
-        if(!targetLangCode.equals("dl")){
-            AndroidNetworking.post("https://api-free.deepl.com/v2/translate")
-                    .addHeaders("Authorization","DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx")
-                    .addQueryParameter("text",textToTranslate)
-                    .addQueryParameter("target_lang",targetLangCode)
-                    .build()
-                    .getAsJSONObject(new JSONObjectRequestListener() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                String jsonString = response.toString();
-                                JSONObject jsonObject = new JSONObject(jsonString);
-                                JSONArray translationsArray = jsonObject.getJSONArray("translations");
-                                JSONObject firstTranslation = translationsArray.getJSONObject(0);
-                                String translatedTextStr = firstTranslation.getString("text");
-                                translatedText.setText(translatedTextStr);
-                                translationManager.addTranslation(targetLangCode,textToTranslate,translatedText.getText().toString());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+        if(!originalText.getText().toString().isEmpty()){
+            String textToTranslate = originalText.getText().toString();
+            String targetLangCode = getSelectedLangCode(targetLangSelected);
+            if(!targetLangCode.equals("dl")){
+                AndroidNetworking.post("https://api-free.deepl.com/v2/translate")
+                        .addHeaders("Authorization","DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx")
+                        .addQueryParameter("text",textToTranslate)
+                        .addQueryParameter("target_lang",targetLangCode)
+                        .build()
+                        .getAsJSONObject(new JSONObjectRequestListener() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    String jsonString = response.toString();
+                                    JSONObject jsonObject = new JSONObject(jsonString);
+                                    JSONArray translationsArray = jsonObject.getJSONArray("translations");
+                                    JSONObject firstTranslation = translationsArray.getJSONObject(0);
+                                    String translatedTextStr = firstTranslation.getString("text");
+                                    translatedText.setText(translatedTextStr);
+                                    translationManager.addTranslation(targetLangCode,textToTranslate,translatedText.getText().toString());
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onError(ANError anError) {
-                            Toast.makeText(getApplicationContext(),"Failed to translate object",Toast.LENGTH_SHORT).show();
-                        }
-                    });
-          }else{
-            Toast.makeText(this,"Please choose a language to translate to",Toast.LENGTH_SHORT).show();
+                            @Override
+                            public void onError(ANError anError) {
+                                Toast.makeText(getApplicationContext(),"Failed to translate object",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }else{
+                Toast.makeText(this,"Please choose a language to translate to",Toast.LENGTH_SHORT).show();
+            }
+        }else{
+            Toast.makeText(this,"Please enter text before pressing translate",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -100,8 +102,6 @@ public class MainActivity extends AppCompatActivity {
         originalLang = findViewById(R.id.originalLanguagesSpinner);
         translatedLang = findViewById(R.id.translatedLanguagesSpinner);
 
-        charCountText = findViewById(R.id.charCountText);
-        charLimitText = findViewById(R.id.charLimitText);
     }
 
     // Method to get the list of languages
@@ -223,30 +223,11 @@ public class MainActivity extends AppCompatActivity {
         return -1;
     }
 
-    public void setCharCount(){
-        AndroidNetworking.get("https://api-free.deepl.com/v2/usage")
-                .addHeaders("Authorization","DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx")
-                .build()
-                .getAsJSONObject(new JSONObjectRequestListener() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        String jsonStr = response.toString();
-                        try {
-                            JSONObject jsonObj = new JSONObject(jsonStr);
-                            String charCount = jsonObj.getString("character_count");
-                            String charLimit = jsonObj.getString("character_limit");
-                            charCountText.setText(charCount);
-                            charLimitText.setText(charLimit);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
 
-                    @Override
-                    public void onError(ANError anError) {
-                        Toast.makeText(getApplicationContext(),"Failed to get character count!",Toast.LENGTH_SHORT).show();
-                    }
-                });
+    public void onClickCharCount(View view){
+        Intent nextAct = new Intent(this,CountCharacters.class);
+        startActivity(nextAct);
     }
+
 
 }

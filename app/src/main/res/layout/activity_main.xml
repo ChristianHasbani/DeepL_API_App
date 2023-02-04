@@ -7,6 +7,7 @@
     tools:context=".MainActivity">
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
         android:layout_width="409dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -19,7 +20,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="30dp"
         android:background="@drawable/edittext_bg"
         android:ems="10"
@@ -30,7 +31,7 @@
         android:textAlignment="viewStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/charLimitLabel"
+        app:layout_constraintTop_toBottomOf="@+id/imageButton"
         tools:ignore="SpeakableTextPresentCheck" />
 
     <Button
@@ -104,58 +105,30 @@
 
     <Button
         android:id="@+id/historyBtn"
-        android:layout_width="0dp"
+        android:layout_width="115dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
+        android:minWidth="150dp"
         android:minHeight="50dp"
         android:onClick="onClickHistory"
         android:text="@string/history"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/translateButton" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/charCount"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/charCountLabel"
+    <Button
+        android:id="@+id/charCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="20dp"
-        android:text="Character Count:"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/originalLanguagesSpinner" />
-
-    <TextView
-        android:id="@+id/charLimitLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="20dp"
-        android:text="Character Limit:"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/charCountLabel" />
-
-    <TextView
-        android:id="@+id/charCountText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/charCountLabel"
-        app:layout_constraintTop_toBottomOf="@+id/translatedLanguagesSpinner" />
-
-    <TextView
-        android:id="@+id/charLimitText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/charLimitLabel"
-        app:layout_constraintTop_toBottomOf="@+id/charCountText" />
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="30dp"
+        android:minWidth="150dp"
+        android:minHeight="50dp"
+        android:onClick="onClickCharCount"
+        android:text="Character count"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
