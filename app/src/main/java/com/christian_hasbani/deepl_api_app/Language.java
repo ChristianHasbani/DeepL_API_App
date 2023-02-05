@@ -10,9 +10,7 @@ public class Language {
         this.name = name;
     }
 
-    public String toString(){
-        return language;
-    }
+
 
     public String getLanguage(){
         return language;
@@ -22,5 +20,9 @@ public class Language {
         return name;
     }
 
+    @Override
+    public String toString(){
+        return name;
+    }
 
 }

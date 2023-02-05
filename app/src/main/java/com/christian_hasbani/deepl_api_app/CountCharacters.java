@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 public class CountCharacters extends AppCompatActivity {
 
+    //UI Components
     private TextView charCountText;
     private EditText authKeyText;
 
@@ -27,9 +28,10 @@ public class CountCharacters extends AppCompatActivity {
         initVariables();
     }
 
+    //Method to activaite when the user clicks on the get character count button
     public void onClickGetCharCount(View view){
+        //check if the user entered text in the authentication key edit text field
         if (!authKeyText.getText().toString().isEmpty()) {
-
             AndroidNetworking.get("https://api-free.deepl.com/v2/usage")
                     .addHeaders("Authorization","DeepL-Auth-Key " + authKeyText.getText().toString())
                     .build()
@@ -57,6 +59,7 @@ public class CountCharacters extends AppCompatActivity {
         }
     }
 
+    //Method to initialize the variables in the UI
     public void initVariables(){
         charCountText = findViewById(R.id.charCountText);
         authKeyText = findViewById(R.id.authKeyText);

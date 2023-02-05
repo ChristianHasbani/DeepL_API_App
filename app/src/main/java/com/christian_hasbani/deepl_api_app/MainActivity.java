@@ -32,17 +32,14 @@ public class MainActivity extends AppCompatActivity {
     //Components Used
     private EditText originalText,translatedText;
     private Spinner originalLang,translatedLang;
+    private String originalLangSelected;
+    private String targetLangSelected;
 
     //List of Languages available on DeepL
     private ArrayList<Language> languages = new ArrayList<>();
 
-    private String originalLangSelected;
-    private String targetLangSelected;
-
     //Translation manager for saving preferences
     private TranslationManager translationManager;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +52,13 @@ public class MainActivity extends AppCompatActivity {
         translationManager = new TranslationManager(getApplicationContext());
     }
 
+    //Method to be called when the user clicks on the translate button
     public void onClickTranslate(View view){
+        //Checks if the user entered text in the edit text before the function calls the API
         if(!originalText.getText().toString().isEmpty()){
             String textToTranslate = originalText.getText().toString();
             String targetLangCode = getSelectedLangCode(targetLangSelected);
+            //dl is code for Detect Language which I added manually in the spinners which is not a language
             if(!targetLangCode.equals("dl")){
                 AndroidNetworking.post("https://api-free.deepl.com/v2/translate")
                         .addHeaders("Authorization","DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx")
@@ -126,16 +126,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //Method to convert an array of type languages to array of type string
-    public ArrayList<String> convertToString(ArrayList<Language> arr){
-        ArrayList<String> result = new ArrayList<>();
-        for (Language l : arr) {
-            result.add(l.getName());
-        }
-        return result;
-    }
-
-
+    //Method to setup the language spinners fram the DeepL API
     public void setupSpinners(String jsonString){
 
         languages.add(new Language("Detect Language","dl"));
@@ -153,11 +144,9 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        //Get the names of the languages
-        ArrayList<String> langNames = convertToString(languages);
 
         //Add the names of the languages to the spinners
-        ArrayAdapter adapter= new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_item, langNames);
+        ArrayAdapter adapter= new ArrayAdapter<Language>(getApplicationContext(),android.R.layout.simple_spinner_item, languages);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         originalLang.setAdapter(adapter);
         translatedLang.setAdapter(adapter);
@@ -192,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //Method to get the code for each language to be used in the API call when translating
     public String getSelectedLangCode(String selectedLang){
         String code = "";
         for(Language lang:languages){
@@ -202,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
         return code;
     }
 
+    //Method called when the user clicks on the history button to launch the history activity
     public void onClickHistory(View view){
         Intent historyActivity = new Intent(this,HistoryActivity.class);
         ArrayList<Translation> translations = translationManager.getTranslations();
@@ -209,11 +200,13 @@ public class MainActivity extends AppCompatActivity {
         startActivity(historyActivity);
     }
 
+    //Method called when the user clicks on the swap icon to switch the selected languages in the spinners
     public void onClickSwap(View view){
         originalLang.setSelection(findSelectedPos(targetLangSelected),true);
         translatedLang.setSelection(findSelectedPos(originalLangSelected),true);
     }
 
+    //Method to get the index of an element by name
     public int findSelectedPos(String name){
         for(int i = 0; i<languages.size(); i++){
             if(languages.get(i).getName().equalsIgnoreCase(name)){
@@ -223,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         return -1;
     }
 
-
+    //Method when the user clicks on the character count button
     public void onClickCharCount(View view){
         Intent nextAct = new Intent(this,CountCharacters.class);
         startActivity(nextAct);
