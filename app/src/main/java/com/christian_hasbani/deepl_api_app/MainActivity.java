@@ -25,6 +25,9 @@ import org.json.JSONObject;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -40,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
 
     //Translation manager for saving preferences
     private TranslationManager translationManager;
+
+    //Authentication key
+    private final String AUTH_KEY = "DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,36 +64,13 @@ public class MainActivity extends AppCompatActivity {
         if(!originalText.getText().toString().isEmpty()){
             String textToTranslate = originalText.getText().toString();
             String targetLangCode = getSelectedLangCode(targetLangSelected);
-            //dl is code for Detect Language which I added manually in the spinners which is not a language
-            if(!targetLangCode.equals("dl")){
-                AndroidNetworking.post("https://api-free.deepl.com/v2/translate")
-                        .addHeaders("Authorization","DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx")
-                        .addQueryParameter("text",textToTranslate)
-                        .addQueryParameter("target_lang",targetLangCode)
-                        .build()
-                        .getAsJSONObject(new JSONObjectRequestListener() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    String jsonString = response.toString();
-                                    JSONObject jsonObject = new JSONObject(jsonString);
-                                    JSONArray translationsArray = jsonObject.getJSONArray("translations");
-                                    JSONObject firstTranslation = translationsArray.getJSONObject(0);
-                                    String translatedTextStr = firstTranslation.getString("text");
-                                    translatedText.setText(translatedTextStr);
-                                    translationManager.addTranslation(targetLangCode,textToTranslate,translatedText.getText().toString());
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+            String sourceLangCode = getSelectedLangCode(originalLangSelected);
 
-                            @Override
-                            public void onError(ANError anError) {
-                                Toast.makeText(getApplicationContext(),"Failed to translate object",Toast.LENGTH_SHORT).show();
-                            }
-                        });
+            //dl is code for Detect Language which I added manually in the spinners which is not a language
+            if(!sourceLangCode.equals("dl")){
+                translateWithSource(textToTranslate,sourceLangCode,targetLangCode);
             }else{
-                Toast.makeText(this,"Please choose a language to translate to",Toast.LENGTH_SHORT).show();
+                translateWithoutSourceLang(textToTranslate,targetLangCode);
             }
         }else{
             Toast.makeText(this,"Please enter text before pressing translate",Toast.LENGTH_SHORT).show();
@@ -107,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     // Method to get the list of languages
     public void getLanguages(){
         AndroidNetworking.get("https://api-free.deepl.com/v2/languages")
-                .addHeaders("Authorization","DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx")
+                .addHeaders("Authorization",AUTH_KEY)
                 .build()
                 .getAsJSONArray(new JSONArrayRequestListener() {
                     @Override
@@ -139,17 +122,16 @@ public class MainActivity extends AppCompatActivity {
                 final Language languageObj = new Language(name,language);
                 languages.add(languageObj);
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
 
         //Add the names of the languages to the spinners
-        ArrayAdapter adapter= new ArrayAdapter<Language>(getApplicationContext(),android.R.layout.simple_spinner_item, languages);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        originalLang.setAdapter(adapter);
-        translatedLang.setAdapter(adapter);
+        ArrayAdapter spinnerAdapter= new ArrayAdapter<Language>(getApplicationContext(),android.R.layout.simple_spinner_item, languages);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        originalLang.setAdapter(spinnerAdapter);
+        translatedLang.setAdapter(spinnerAdapter);
 
         originalLang.setSelection(0);
         translatedLang.setSelection(10);
@@ -202,8 +184,12 @@ public class MainActivity extends AppCompatActivity {
 
     //Method called when the user clicks on the swap icon to switch the selected languages in the spinners
     public void onClickSwap(View view){
-        originalLang.setSelection(findSelectedPos(targetLangSelected),true);
-        translatedLang.setSelection(findSelectedPos(originalLangSelected),true);
+        if(!originalLang.getSelectedItem().toString().equals("Detect Language")){
+            originalLang.setSelection(findSelectedPos(targetLangSelected),true);
+            translatedLang.setSelection(findSelectedPos(originalLangSelected),true);
+        }else{
+            Toast.makeText(this,"Please choose a language before swapping",Toast.LENGTH_SHORT).show();
+        }
     }
 
     //Method to get the index of an element by name
@@ -220,6 +206,78 @@ public class MainActivity extends AppCompatActivity {
     public void onClickCharCount(View view){
         Intent nextAct = new Intent(this,CountCharacters.class);
         startActivity(nextAct);
+    }
+
+
+    //Method to set the spinner to the source original langauge
+    public void setSourceLang(String langName){
+        for(int i = 0; i<languages.size(); i++){
+            if(languages.get(i).getLanguage().equalsIgnoreCase(langName)){
+                originalLang.setSelection(i);
+                return;
+            }
+        }
+        Toast.makeText(this,"Could not identify the source language for this text",Toast.LENGTH_SHORT).show();
+    }
+
+    //Method to get the translated text from JSON response
+    public void translateText(String jsonString, String textToTranslate, String targetLangCode){
+       try{
+           JSONObject jsonObject = new JSONObject(jsonString);
+           JSONArray translationsArray = jsonObject.getJSONArray("translations");
+           JSONObject firstTranslation = translationsArray.getJSONObject(0);
+           String sourceLanguage = firstTranslation.getString("detected_source_language");
+           String translatedTextStr = firstTranslation.getString("text");
+           setSourceLang(sourceLanguage);
+           translatedText.setText(translatedTextStr);
+           translationManager.addTranslation(targetLangCode,textToTranslate,translatedText.getText().toString());
+       }catch(JSONException e){
+           e.printStackTrace();
+       }
+
+    }
+
+    //Method to translate without specifying source language
+    public void translateWithoutSourceLang(String textToTranslate, String targetLangCode){
+        AndroidNetworking.post("https://api-free.deepl.com/v2/translate")
+                .addHeaders("Authorization",AUTH_KEY)
+                .addQueryParameter("text",textToTranslate)
+                .addQueryParameter("target_lang",targetLangCode)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String jsonString = response.toString();
+                        translateText(jsonString,textToTranslate,targetLangCode);
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Toast.makeText(getApplicationContext(),"Failed to translate object",Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    //Method to translate with source language
+    public void translateWithSource(String textToTranslate,String sourceLangCode, String targetLangCode){
+        AndroidNetworking.post("https://api-free.deepl.com/v2/translate")
+                .addHeaders("Authorization",AUTH_KEY)
+                .addQueryParameter("text",textToTranslate)
+                .addQueryParameter("source_lang",sourceLangCode)
+                .addQueryParameter("target_lang",targetLangCode)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String jsonString = response.toString();
+                        translateText(jsonString,textToTranslate,targetLangCode);
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Toast.makeText(getApplicationContext(),"Failed to translate object",Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 
