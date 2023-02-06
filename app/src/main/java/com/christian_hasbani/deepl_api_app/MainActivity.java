@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     // Method to get the list of languages
     public void getLanguages(){
         AndroidNetworking.get("https://api-free.deepl.com/v2/languages")
-                .addHeaders("Authorization",AUTH_KEY)
+                .addHeaders("Authorization","DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx")
                 .build()
                 .getAsJSONArray(new JSONArrayRequestListener() {
                     @Override

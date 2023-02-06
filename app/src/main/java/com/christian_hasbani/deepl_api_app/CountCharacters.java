@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,8 +19,9 @@ import org.json.JSONObject;
 public class CountCharacters extends AppCompatActivity {
 
     //UI Components
-    private TextView charCountText;
+    private TextView charCountText, percentageText;
     private EditText authKeyText;
+    private ProgressBar pb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,11 @@ public class CountCharacters extends AppCompatActivity {
                                 String charCount = jsonObj.getString("character_count");
                                 String charLimit = jsonObj.getString("character_limit");
                                 charCountText.setText("Characters used: " +charCount + "/" + charLimit);
+                                double progress = (Double.valueOf(charCount)/Double.valueOf(charLimit) )* 100;
+                                pb.setProgress((int)progress,true);
+                                percentageText.setText(percentageText.getText().toString() + progress + "%");
+                                percentageText.setVisibility(View.VISIBLE);
+                                pb.setVisibility(View.VISIBLE);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -63,5 +70,9 @@ public class CountCharacters extends AppCompatActivity {
     public void initVariables(){
         charCountText = findViewById(R.id.charCountText);
         authKeyText = findViewById(R.id.authKeyText);
+        pb = findViewById(R.id.progressBar);
+        percentageText = findViewById(R.id.percentageText);
+        pb.setVisibility(View.INVISIBLE);
+        percentageText.setVisibility(View.INVISIBLE);
     }
 }
