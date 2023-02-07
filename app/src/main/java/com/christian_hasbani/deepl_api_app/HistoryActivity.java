@@ -22,11 +22,13 @@ public class HistoryActivity extends AppCompatActivity {
         createAdapter();
     }
 
+    //Method to initialize variables
     public void initVariables(){
         translations = (ArrayList<Translation>) getIntent().getSerializableExtra("Translations");
         listView = findViewById(R.id.translationsListView);
     }
 
+    //Method to create an adapter for the list view
     public void createAdapter(){
         Context context = getApplicationContext();
         int layoutId = R.layout.translation_item;

@@ -49,11 +49,8 @@ public class TranslationAdapter  extends ArrayAdapter<Translation> {
         TextView originalText = view.findViewById(R.id.originalText);
         TextView translatedText = view.findViewById(R.id.translatedText);
 
-
         //getting the hero of the specified position
         Translation translation = translations.get(position);
-
-
 
         //adding values to the list item
         langText.setText(translation.getLang());

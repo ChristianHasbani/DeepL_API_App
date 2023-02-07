@@ -45,12 +45,7 @@ public class CountCharacters extends AppCompatActivity {
                                 JSONObject jsonObj = new JSONObject(jsonStr);
                                 String charCount = jsonObj.getString("character_count");
                                 String charLimit = jsonObj.getString("character_limit");
-                                charCountText.setText("Characters used: " +charCount + "/" + charLimit);
-                                double progress = (Double.valueOf(charCount)/Double.valueOf(charLimit) )* 100;
-                                pb.setProgress((int)progress,true);
-                                percentageText.setText(percentageText.getText().toString() + progress + "%");
-                                percentageText.setVisibility(View.VISIBLE);
-                                pb.setVisibility(View.VISIBLE);
+                                updateView(charCount,charLimit);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -74,5 +69,15 @@ public class CountCharacters extends AppCompatActivity {
         percentageText = findViewById(R.id.percentageText);
         pb.setVisibility(View.INVISIBLE);
         percentageText.setVisibility(View.INVISIBLE);
+    }
+
+    //After getting the authentication key display
+    public void updateView(String charCount, String charLimit){
+        charCountText.setText("Characters used: " +charCount + "/" + charLimit);
+        double progress = (Double.valueOf(charCount)/Double.valueOf(charLimit) )* 100;
+        pb.setProgress((int)progress,true);
+        percentageText.setText(percentageText.getText().toString() + progress + "%");
+        percentageText.setVisibility(View.VISIBLE);
+        pb.setVisibility(View.VISIBLE);
     }
 }

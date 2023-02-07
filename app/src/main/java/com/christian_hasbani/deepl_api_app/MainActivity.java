@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        Collections.sort(languages,new LanguageComparator());
 
         //Add the names of the languages to the spinners
         ArrayAdapter spinnerAdapter= new ArrayAdapter<Language>(getApplicationContext(),android.R.layout.simple_spinner_item, languages);
@@ -133,8 +133,9 @@ public class MainActivity extends AppCompatActivity {
         originalLang.setAdapter(spinnerAdapter);
         translatedLang.setAdapter(spinnerAdapter);
 
-        originalLang.setSelection(0);
-        translatedLang.setSelection(10);
+        originalLang.setSelection(findSelectedPos("Detect Language"));
+        int random_int = (int)Math.floor(Math.random() * (languages.size() - 0 + 1) + 0);
+        translatedLang.setSelection(random_int);
 
         originalLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
