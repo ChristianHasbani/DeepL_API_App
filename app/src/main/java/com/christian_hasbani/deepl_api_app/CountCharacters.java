@@ -2,7 +2,9 @@ package com.christian_hasbani.deepl_api_app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -19,9 +21,10 @@ import org.json.JSONObject;
 public class CountCharacters extends AppCompatActivity {
 
     //UI Components
-    private TextView charCountText, percentageText;
     private EditText authKeyText;
     private ProgressBar pb;
+
+    private String charCount,charLimit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +35,7 @@ public class CountCharacters extends AppCompatActivity {
 
     //Method to activaite when the user clicks on the get character count button
     public void onClickGetCharCount(View view){
+        load();
         //check if the user entered text in the authentication key edit text field
         if (!authKeyText.getText().toString().isEmpty()) {
             AndroidNetworking.get("https://api-free.deepl.com/v2/usage")
@@ -43,9 +47,8 @@ public class CountCharacters extends AppCompatActivity {
                             String jsonStr = response.toString();
                             try {
                                 JSONObject jsonObj = new JSONObject(jsonStr);
-                                String charCount = jsonObj.getString("character_count");
-                                String charLimit = jsonObj.getString("character_limit");
-                                updateView(charCount,charLimit);
+                                charCount = jsonObj.getString("character_count");
+                                charLimit = jsonObj.getString("character_limit");
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -63,21 +66,29 @@ public class CountCharacters extends AppCompatActivity {
 
     //Method to initialize the variables in the UI
     public void initVariables(){
-        charCountText = findViewById(R.id.charCountText);
         authKeyText = findViewById(R.id.authKeyText);
         pb = findViewById(R.id.progressBar);
-        percentageText = findViewById(R.id.percentageText);
-        pb.setVisibility(View.INVISIBLE);
-        percentageText.setVisibility(View.INVISIBLE);
+//        pb.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
+
     }
 
-    //After getting the authentication key display
-    public void updateView(String charCount, String charLimit){
-        charCountText.setText("Characters used: " +charCount + "/" + charLimit);
-        double progress = (Double.valueOf(charCount)/Double.valueOf(charLimit) )* 100;
-        pb.setProgress((int)progress,true);
-        percentageText.setText(percentageText.getText().toString() + progress + "%");
-        percentageText.setVisibility(View.VISIBLE);
+    //Method to create a loading effect
+    public void load(){
         pb.setVisibility(View.VISIBLE);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                int remaining = Integer.valueOf(charLimit) - Integer.valueOf(charCount);
+                pb.setVisibility(View.INVISIBLE);
+                new AlertDialog.Builder(CountCharacters.this)
+                        .setTitle("Number of characters used")
+                        .setMessage("You have used: "
+                                + charCount + "/"
+                                +charLimit +"\nYou still have " + String.valueOf(remaining)
+                                + " characters")
+                        .show();
+            }
+        },2000);
     }
 }
