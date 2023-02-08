@@ -32,6 +32,7 @@ public class HistoryActivity extends AppCompatActivity {
     public void createAdapter(){
         Context context = getApplicationContext();
         int layoutId = R.layout.translation_item;
+        //Create adapter for the list view
         TranslationAdapter adapter = new TranslationAdapter(context,layoutId,translations);
         listView.setAdapter(adapter);
     }

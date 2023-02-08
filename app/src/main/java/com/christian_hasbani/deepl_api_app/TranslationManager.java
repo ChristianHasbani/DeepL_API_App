@@ -10,10 +10,11 @@ import java.util.Map;
 
 public class TranslationManager {
     private static final String PREFS_NAME = "Translations";
-    private static final String KEY_PREFIX = "Translation_";
-    private static final int MAX_TRANSLATIONS = 10;
+    private static final String KEY_PREFIX = "Translation_";//prefix key for saving the translations
+    private static final int MAX_TRANSLATIONS = 10;//Max number of translations saved
 
-    private SharedPreferences sharedPrefs;
+    private SharedPreferences sharedPrefs;//Shared Preferences file to be saved in
+
 
     public TranslationManager(Context context) {
         sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -33,7 +34,6 @@ public class TranslationManager {
 
         // Add the new translation
         editor.putString(KEY_PREFIX + currentSize, language + "|" + text + " -> " + translatedText);
-//        editor.clear();
         editor.commit();
     }
 

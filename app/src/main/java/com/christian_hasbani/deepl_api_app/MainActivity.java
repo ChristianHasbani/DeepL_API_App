@@ -4,14 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidnetworking.AndroidNetworking;
@@ -25,9 +28,7 @@ import org.json.JSONObject;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -38,14 +39,9 @@ public class MainActivity extends AppCompatActivity {
     private String originalLangSelected;
     private String targetLangSelected;
 
-    //List of Languages available on DeepL
-    private ArrayList<Language> languages = new ArrayList<>();
-
-    //Translation manager for saving preferences
-    private TranslationManager translationManager;
-
-    //Authentication key
-    private final String AUTH_KEY = "DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx";
+    private ArrayList<Language> languages = new ArrayList<>();//List of Languages available on DeepL
+    private TranslationManager translationManager;//Translation manager for saving preferences
+    private final String AUTH_KEY = "DeepL-Auth-Key 6c3cec34-e521-c80e-f6c2-ff924debf1d9:fx";//Authentication key
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         AndroidNetworking.initialize(this);
         getLanguages();
         translationManager = new TranslationManager(getApplicationContext());
+
     }
 
     //Method to be called when the user clicks on the translate button
@@ -63,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
         //Checks if the user entered text in the edit text before the function calls the API
         if(!originalText.getText().toString().isEmpty()){
             String textToTranslate = originalText.getText().toString();
-            String targetLangCode = getSelectedLangCode(targetLangSelected);
-            String sourceLangCode = getSelectedLangCode(originalLangSelected);
+            String targetLangCode = getSelectedLangName(targetLangSelected);
+            String sourceLangCode = getSelectedLangName(originalLangSelected);
 
             //dl is code for Detect Language which I added manually in the spinners which is not a language
             if(!sourceLangCode.equals("dl")){
@@ -100,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     @Override
                     public void onError(ANError anError) {
+                        //Print the error log
                         Log.e("DeepL error", anError.getErrorDetail());
                         Log.e("DeepL error", "Response code: " + anError.getErrorCode());
                         Log.e("DeepL error", "Response body: " + anError.getErrorBody());
@@ -111,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
 
     //Method to setup the language spinners fram the DeepL API
     public void setupSpinners(String jsonString){
-
         languages.add(new Language("Detect Language","dl"));
         try {
             JSONArray jsonArray = new JSONArray(jsonString);
@@ -125,18 +122,19 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Collections.sort(languages,new LanguageComparator());
+        Collections.sort(languages,new LanguageComparator());//Sort the language arraylist in ascending order
 
-        //Add the names of the languages to the spinners
-        ArrayAdapter spinnerAdapter= new ArrayAdapter<Language>(getApplicationContext(),android.R.layout.simple_spinner_item, languages);
+        //Create adapter and set it to the 2 spinners (Original and translated language spinners)
+        ArrayAdapter spinnerAdapter= new ArrayAdapter<Language>(getApplicationContext(),R.layout.spinner_item, languages);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         originalLang.setAdapter(spinnerAdapter);
         translatedLang.setAdapter(spinnerAdapter);
 
         originalLang.setSelection(findSelectedPos("Detect Language"));
-        int random_int = (int)Math.floor(Math.random() * (languages.size() - 0 + 1) + 0);
-        translatedLang.setSelection(random_int);
+        int random_int = (int)Math.floor(Math.random() * (languages.size() - 0 + 1) + 0);//Create a random number
+        translatedLang.setSelection(random_int);//Select a random language for display
 
+        //Create listener for the selected original language
         originalLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -149,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+        //Listener for the selected translated language
         translatedLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -165,21 +163,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Method to get the code for each language to be used in the API call when translating
-    public String getSelectedLangCode(String selectedLang){
-        String code = "";
+    public String getSelectedLangName(String selectedLang){
+        String name = "";
         for(Language lang:languages){
             if(lang.getName().equalsIgnoreCase(selectedLang)){
-                code = lang.getLanguage();
+                name = lang.getLanguage();
             }
         }
-        return code;
+        return name;
     }
 
     //Method called when the user clicks on the history button to launch the history activity
     public void onClickHistory(View view){
         Intent historyActivity = new Intent(this,HistoryActivity.class);
-        ArrayList<Translation> translations = translationManager.getTranslations();
-        historyActivity.putExtra("Translations",translations);
+        ArrayList<Translation> translations = translationManager.getTranslations();//Get the translations from the shared preferences file
+        historyActivity.putExtra("Translations",translations);//Send the translations list to the history activity
         startActivity(historyActivity);
     }
 
@@ -188,6 +186,9 @@ public class MainActivity extends AppCompatActivity {
         if(!originalLang.getSelectedItem().toString().equals("Detect Language")){
             originalLang.setSelection(findSelectedPos(targetLangSelected),true);
             translatedLang.setSelection(findSelectedPos(originalLangSelected),true);
+            String temp = originalText.getText().toString();
+            originalText.setText(translatedText.getText().toString());
+            translatedText.setText(temp);
         }else{
             Toast.makeText(this,"Please choose a language before swapping",Toast.LENGTH_SHORT).show();
         }
